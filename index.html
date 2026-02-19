@@ -1,1 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plant Dashboard</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f4; }
+        .card { background: white; padding: 30px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .moisture { font-size: 3rem; color: #2ecc71; margin: 20px 0; }
+        .btn { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: none; border-radius: 8px; color: white; }
+        .on { background: #e74c3c; } .off { background: #3498db; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🌿 Plant Monitor</h1>
+        <div class="moisture"><span id="moisture">--</span>%</div>
+        <button id="pumpBtn" class="btn off" onclick="toggle()">Turn Pump ON</button>
+    </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3FM6UKhtgwVsrSTW_19pVMaUrCFR4Bt4",
+            authDomain: "iot-device-9a902.firebaseapp.com",
+            databaseURL: "https://iot-device-9a902-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "iot-device-9a902",
+            storageBucket: "iot-device-9a902.firebasestorage.app",
+            messagingSenderId: "1027372613001",
+            appId: "1:1027372613001:web:c4c62bf75b89b4031d7558"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        let status = false;
+
+        onValue(ref(db, 'plant/moisture'), (s) => { document.getElementById('moisture').innerText = s.val() || 0; });
+        onValue(ref(db, 'plant/pump_status'), (s) => {
+            status = s.val();
+            const b = document.getElementById('pumpBtn');
+            b.innerText = status ? "Turn Pump OFF" : "Turn Pump ON";
+            b.className = status ? "btn on" : "btn off";
+        });
+
+        window.toggle = () => { set(ref(db, 'plant/pump_status'), !status); };
+    </script>
+</body>
+</html>
